@@ -41,8 +41,56 @@ write.csv(antioxi_subset, file = '../../antiox_prelim/data/antiox_subset_tara.cs
 
 ############
 
+library(readxl)
+library(magrittr)
+
+meta_data_genomes <- read_excel('data/tara_ocean_smags/Table_S03_statistics_nr_SMAGs_METdb.xlsx',
+                                sheet = 1,
+                                skip = 2)
+
+# subsetting only the photosynthetic phytoplankton
+genomes_photosynthetic_w_na <- meta_data_genomes[meta_data_genomes$Phytoplankton == "Phytoplankton", ]$`Genome_Id final names`
+genomes_photosynthetic <- genomes_photosynthetic_w_na[!is.na(genomes_photosynthetic_w_na)]
+
+matches <- unique (grep(paste(toMatch,collapse="|"), 
+                        myfile$Letter, value=TRUE))
+
+# getting the genes that are antixodiants (above)
 antioxi_subset <- read.csv("data/antiox_subset_tara.csv")
 
-antioxi_subset$Gene_ID
+# subsetting the proteins that belong to photosytnehtic organisms
+grep(pattern = "TARA_AON_82_MAG_00189", 
+     x = antioxi_subset$Gene_ID)
 
+antioxi_subset_photo <- dplyr::filter(antioxi_subset, 
+                              grepl(paste(genomes_photosynthetic, 
+                                     collapse="|"), Gene_ID))
+
+## making txt files for each of the lists of gene names
+sod_gene_id <- antioxi_subset_photo[antioxi_subset_photo$EC_number == superoxide_dismutase_ec, ]$Gene_ID %>% gsub(pattern = "mRNA.", replacement = "")
+apx_gene_id <- antioxi_subset_photo[antioxi_subset_photo$EC_number == ascorbate_peroxidase_ec, ]$Gene_ID %>% gsub(pattern = "mRNA.", replacement = "")
+cyto_c_gene_id <- antioxi_subset_photo[antioxi_subset_photo$EC_number == cytochrome_c_peroxidase_ec, ]$Gene_ID %>% gsub(pattern = "mRNA.", replacement = "")
+gpx_gene_id <- antioxi_subset_photo[antioxi_subset_photo$EC_number == glutathione_peroxidase_ec, ]$Gene_ID %>% gsub(pattern = "mRNA.", replacement = "")
+prx_gene_id <- antioxi_subset_photo[antioxi_subset_photo$EC_number == peroxiredoxins_ec, ]$Gene_ID %>% gsub(pattern = "mRNA.", replacement = "")
+cat_gene_id <- antioxi_subset_photo[antioxi_subset_photo$EC_number == catalase_ec, ]$Gene_ID %>% gsub(pattern = "mRNA.", replacement = "")
+
+# getting gene lists for getting their actual protein sequences
+write.table(sod_gene_id, file = "data/antiox_gene_name_lists/sod_gene_id.txt", 
+            row.names = FALSE, 
+            quote = FALSE)
+write.table(apx_gene_id, file = "data/antiox_gene_name_lists/APX_gene_id.txt", 
+            row.names = FALSE, 
+            quote = FALSE)
+write.table(cyto_c_gene_id, file = "data/antiox_gene_name_lists/cyto_c_gene_id.txt", 
+            row.names = FALSE, 
+            quote = FALSE)
+write.table(gpx_gene_id, file = "data/antiox_gene_name_lists/gpx_gene_id.txt", 
+            row.names = FALSE, 
+            quote = FALSE)
+write.table(cat_gene_id, file = "data/antiox_gene_name_lists/cat_gene_id.txt", 
+            row.names = FALSE, 
+            quote = FALSE)
+write.table(prx_gene_id, file = "data/antiox_gene_name_lists/prx_gene_id.txt", 
+            row.names = FALSE, 
+            quote = FALSE)
 
