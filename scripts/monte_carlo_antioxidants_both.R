@@ -2,30 +2,6 @@
 library(magrittr)
 library(ggpubr)
 
-# metal_per_antioxidant <- 1
-# 
-# antioxidant_per_prot <- runif(n = 1, min = 0, max = 0.00910)
-# 
-# protein_aa_per_N <- 0.699
-# 
-# N_total_protein_per_N_total <- 0.8
-# 
-# N_to_C <- 16/106
-# antioxidant_per_prot_max <- 0.02
-# empirical_noise <- antioxidant_per_prot_max*exp(x = -6.02263 - 0.63273*log(antioxidant_per_prot_max))
-
-# 
-# empirical_noise <- 0.03*exp(x = -6.02263 - 0.63273*log(0.03))
-# 
-# antioxidant_per_prot_max_noise_added <- truncnorm::rtruncnorm(n = 1000, 
-#                                                               a = 0, b = Inf, 
-#                                                               mean = 0.03, 
-#                                                               sd = empirical_noise)
-# 
-# 
-# hist(antioxidant_per_prot_max_noise_added)
-# 0.63596409   1.17032277 
-
 li2014_est <- read.csv('data/li2014_lgnormal_dist.csv')
 schmidt2016_est <- read.csv('data/schmidt2016_lgnormal_dist.csv')
 nunn2013_est <- read.csv('data/nunn2013_lgnormal_dist.csv')
@@ -37,13 +13,13 @@ outcome_var <- function(number_to_gen, metal_per_antioxidant = 2,
                         anti_per_aa = 1/310,
                         antioxidant_per_prot_max = 0.04){
   
-  empirical_noise <- antioxidant_per_prot_max*exp(x = -6.02263 - 0.63273*log(antioxidant_per_prot_max))
-  
-  antioxidant_per_prot_max_noise_added <- truncnorm::rtruncnorm(n = number_to_gen, 
-                                                                a = 0, b = Inf, 
-                                                                mean = antioxidant_per_prot_max, 
-                                                                sd = empirical_noise)
-  
+  # empirical_noise <- antioxidant_per_prot_max*exp(x = -6.02263 - 0.63273*log(antioxidant_per_prot_max))
+  # 
+  # antioxidant_per_prot_max_noise_added <- truncnorm::rtruncnorm(n = number_to_gen,
+  #                                                               a = 0, b = Inf,
+  #                                                               mean = antioxidant_per_prot_max,
+  #                                                               sd = empirical_noise)
+
   # antioxidant_per_prot <- runif(n = number_to_gen,
   #                               min = 0,
   #                               max = antioxidant_per_prot_max_noise_added)
@@ -52,7 +28,7 @@ outcome_var <- function(number_to_gen, metal_per_antioxidant = 2,
   # expression_foldchange <- 4
   # expression_foldchange <- rlnorm(number_to_gen, meanlog = -0.024092762, sdlog = 0.871026349)
   # expression_foldchange <- rlnorm(number_to_gen, meanlog = 0.63596409, sdlog = 1.17032277)
-  antioxidant_per_prot <- antioxidant_per_prot_max_noise_added*expression_foldchange
+  antioxidant_per_prot <- antioxidant_per_prot_max*expression_foldchange
   
   protein_aa_per_N <- 0.699
   
@@ -209,6 +185,7 @@ both_contribution_overall_p <- overall_c_to_fe %>%
   #                                                   y = position_y),
   #           x = 10) +
   xlab('Overall Antioxidant Contribution to Fe:C (umol/mol)') +
+  ylab('Kernel Density') +
   theme(legend.position = c(0.8, 0.8), 
         legend.title = element_blank());both_contribution_overall_p
 
@@ -217,6 +194,7 @@ ccp_both_p1 <- ccp_val_both %>%
   geom_density(fill = 'firebrick4', alpha = 0.4) +
   theme_bw() +
   xlim(0, 15) +
+  ylab('Kernel Density') +
   xlab('Cytochrome C Peroxidase Contribution to Fe:C (umol/mol)');ccp_both_p1
 
 cat_both_p1 <- cat_both %>% 
@@ -224,6 +202,7 @@ cat_both_p1 <- cat_both %>%
   geom_density(fill = 'firebrick4', alpha = 0.4) +
   theme_bw() + 
   xlim(0, 15) +
+  ylab('Kernel Density') +
   xlab('Catalase Contribution to Fe:C (umol/mol)');cat_both_p1
 
 mnfesod_both_p1 <- mnfesod_both %>% 
@@ -233,6 +212,7 @@ mnfesod_both_p1 <- mnfesod_both %>%
   theme_bw() + 
   xlim(0, 15) +
   # xlim(0, 50) +
+  ylab('Kernel Density') +
   xlab('MnFeSOD Contribution to Mn, Fe:C (umol/mol)');mnfesod_both_p1
 
 apx_both_p1 <- apx_val_both %>% 
@@ -242,6 +222,7 @@ apx_both_p1 <- apx_val_both %>%
   theme_bw() + 
   xlim(0, 15) +
   # xlim(0, 50) +
+  ylab('Kernel Density') +
   xlab('Ascorbate Peroxidase Contribution to Fe:C (umol/mol)');apx_both_p1
 
 
@@ -261,9 +242,10 @@ nisod_both_p1 <- nisod_val_both %>%
   geom_density(fill = 'firebrick4', alpha = 0.4) +
   # geom_histogram() +
   theme_bw() + 
+  ylab('Kernel Density') +
   # xlim(0,) +
   # xlim(0, 50) +
-  xlim(0, 5) +
+  xlim(0, 3) +
   xlab('NiSOD Contribution to Ni:C (umol/mol)');nisod_both_p1
 
 
@@ -273,31 +255,16 @@ cuznsod_both_p1 <- cuznsod_val_both %>%
   # geom_histogram() +
   theme_bw() + 
   # xlim(0,) +
-  xlim(0, 5) +
+  xlim(0, 3) +
+  ylab('Kernel Density') +
   xlab('CuZnSOD Contribution to Cu, Zn:C (umol/mol)');cuznsod_both_p1
 
+quantile(nisod_val_both$c_to_fe, probs = c(0.025, 0.5, 0.975))
+quantile(cuznsod_val_both$c_to_fe, probs = c(0.025, 0.5, 0.975))
 
 other_micro <- ggarrange(nisod_both_p1, cuznsod_both_p1, labels = c('a', 'b'), ncol = 2)
 
 ggsave(other_micro, filename = 'figures/ni_zn_cu_sod.png', width = 9.17, height = 3.35)
-
-# both_contribution_overall <- overall_c_to_fe_variation_both %>% 
-#   ggplot(aes(x = c_to_fe_overall)) +
-#   theme_bw() +
-#   xlim(0, 15) +
-#   geom_density(fill = 'firebrick1', alpha = 0.4) +
-#   xlab('Potential Antioxidant Contribution to Fe:C (umol/mol)')
-tester_4 <- ranges_of_pars(10000,
-                           metal_per_antioxidant = c(23),
-                           anti_per_aa = c(1/20000),
-                           antioxidant_per_prot_max = c(0.2))
-
-tester_4 %>%
-  ggplot(aes(x = c_to_fe)) +
-  geom_histogram() +
-  facet_grid(metal_per_antiox~amino_per_anti + anti_per_prot) +
-  theme_bw() +
-  xlab('Fe/C (uM/M)')
 
 
 
