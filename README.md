@@ -35,7 +35,7 @@ T0_3.raw
 
 For the `phaeo_data_3`, I got data from the PRIDE project with the ID: PXD014877. I used the script `download_phaeo_proteome_3.sh` for this.
 
-Data for the phytoplankton genomes for protein stoichiometry were downloaded from this awesome paper by Delmont et al (2021)[https://www.biorxiv.org/content/10.1101/2020.10.15.341214v2] specifically with:
+Data for the phytoplankton genomes for protein stoichiometry were downloaded from this awesome paper by [Delmont et al (2021)](https://www.biorxiv.org/content/10.1101/2020.10.15.341214v2) specifically with:
 
 ```
 # annotation files
