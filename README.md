@@ -8,6 +8,7 @@ These scripts assume the following file structure
      /tara_ocean_smags/
      /antiox_gene_name_lists/
      /protein_expression_data/
+                             /nunn_data/
                              /phytoplankton_genomes/
                                                    /frag_genome/
                                                    /phaeo_genome/
@@ -60,7 +61,7 @@ Script that gets all the antioxidant protein sequence IDs and makes txt files of
 
 `antioxidant_stoich_from_seqs.ipynb`
 
-Jupyter notebook that calculates stoichiometric composition of various phytoplankton proteins.
+Jupyter notebook that calculates stoichiometric composition of various phytoplankton proteins. The plots for these proteins is in `plotting_antiox_stoich.R`.
 
 ### Proteomic Data Processing
 
@@ -74,5 +75,6 @@ The output of this is then converted to csv with `protein-quant-openms.sh`, `pro
 
 ### Monte Carlo Estimation
 
+We first need to determine some of the parameters, specifically the distribution of fold-changes for protein expression. Three scripts separately analyze the fold-change distribution from three different data sets: `nunn_protein_expression_fold_change.R` (Nunn et al 2013, PLoS ONE); `li_dist_vals.R` (Li et al 2014, Cell); `schmidt_dist_vals.R` (Schmidt et al 2015, Nature Biotechnology). Each of these outputs a parameter file with the appropriate parameters of the fitted log-normal distribution.
 
-
+Monte Carlo method is done using `monte_carlo_antioxidants_both.R`.
