@@ -1,13 +1,18 @@
 ### library(ggplot2)
 library(magrittr)
 library(ggpubr)
+library(dplyr)
 
-li2014_est <- read.csv('data/li2014_lgnormal_dist.csv')
-schmidt2016_est <- read.csv('data/schmidt2016_lgnormal_dist.csv')
-nunn2013_est <- read.csv('data/nunn2013_lgnormal_dist.csv')
+# li2014_est <- read.csv('data/li2014_lgnormal_dist.csv')
+# schmidt2016_est <- read.csv('data/schmidt2016_lgnormal_dist.csv')
+# nunn2013_est <- read.csv('data/nunn2013_lgnormal_dist.csv')
+# 
+# mean_mean <- mean(c(li2014_est$meanlog, schmidt2016_est$meanlog, nunn2013_est$meanlog))
+# mean_sd <- mean(c(li2014_est$meansd, schmidt2016_est$meansd, nunn2013_est$meansd))
 
-mean_mean <- mean(c(li2014_est$meanlog, schmidt2016_est$meanlog, nunn2013_est$meanlog))
-mean_sd <- mean(c(li2014_est$meansd, schmidt2016_est$meansd, nunn2013_est$meansd))
+li2014_emp <- read.csv("data/li2014_empirical_dist.csv")
+nunn2013_emp <- read.csv("data/nunn2013_empirical_dist.csv")
+schmidt0216_emp <- read.csv("data/schmidt2016_empirical_dist.csv")
 
 outcome_var <- function(number_to_gen, metal_per_antioxidant = 2,
                         anti_per_aa = 1/310,
@@ -23,12 +28,18 @@ outcome_var <- function(number_to_gen, metal_per_antioxidant = 2,
   # antioxidant_per_prot <- runif(n = number_to_gen,
   #                               min = 0,
   #                               max = antioxidant_per_prot_max_noise_added)
-  expression_foldchange <- rlnorm(number_to_gen, meanlog = mean_mean, 
-                                  sdlog = mean_sd)
+  # expression_foldchange <- rlnorm(number_to_gen, meanlog = mean_mean, 
+  #                                 sdlog = mean_sd)
+  
+  schmidt2016_sam <- sample(x = schmidt0216_emp$fold_change, size = 1)
+  nunn2013_sam <- sample(x = nunn2013_emp$fold_change, size = 1)
+  li2014_sam <- sample(x = li2014_emp$fold_change, size = 1)
+  
+  expression_foldchange <- sample(x = c(schmidt2016_sam, nunn2013_sam, li2014_sam), size = 1)
   # expression_foldchange <- 4
   # expression_foldchange <- rlnorm(number_to_gen, meanlog = -0.024092762, sdlog = 0.871026349)
   # expression_foldchange <- rlnorm(number_to_gen, meanlog = 0.63596409, sdlog = 1.17032277)
-  antioxidant_per_prot <- antioxidant_per_prot_max*expression_foldchange
+  antioxidant_per_prot <- antioxidant_per_prot_max*expression_foldchange#*antioxidant_per_prot_max_noise_added
   
   protein_aa_per_N <- 0.699
   
@@ -114,35 +125,37 @@ express_overall <- rbind(express_frag,
   summarize(max_exp = max(total_val),
             mean_exp = mean(total_val))
 
+number_to_gen_i <- 100000000
+
 # running monte carlo -----------------------------------------------------------
 
-mnfesod_both <- ranges_of_pars(500000, 
+mnfesod_both <- ranges_of_pars(number_to_gen_i, 
                                metal_per_antioxidant = c(1), 
                                anti_per_aa = c(1/prot_length_overall_sum[prot_length_overall_sum$anti == "MnFeSOD", ]$mean_len),
                                antioxidant_per_prot_max = express_overall[express_overall$antioxi_string == "MnFeSOD", ]$mean_exp)
 
-cat_both <- ranges_of_pars(500000, 
+cat_both <- ranges_of_pars(number_to_gen_i, 
                            metal_per_antioxidant = c(1), 
                            anti_per_aa = c(1/prot_length_overall_sum[prot_length_overall_sum$anti == "CAT", ]$mean_len),
                            antioxidant_per_prot_max = express_overall[express_overall$antioxi_string == "CAT", ]$mean_exp)
 
 
-apx_val_both <- ranges_of_pars(500000, 
+apx_val_both <- ranges_of_pars(number_to_gen_i, 
                                metal_per_antioxidant = c(1), 
                                anti_per_aa = c(1/prot_length_overall_sum[prot_length_overall_sum$anti == "APX", ]$mean_len),
                                antioxidant_per_prot_max = express_overall[express_overall$antioxi_string == "APX", ]$mean_exp)
 
-ccp_val_both <- ranges_of_pars(500000, 
+ccp_val_both <- ranges_of_pars(number_to_gen_i, 
                                metal_per_antioxidant = c(2), 
                                anti_per_aa = c(1/prot_length_overall_sum[prot_length_overall_sum$anti == "CCP", ]$mean_len),
                                antioxidant_per_prot_max = express_overall[express_overall$antioxi_string == "CCP", ]$mean_exp)
 
-cuznsod_val_both <- ranges_of_pars(500000, 
+cuznsod_val_both <- ranges_of_pars(number_to_gen_i, 
                                    metal_per_antioxidant = c(1), 
                                    anti_per_aa = c(1/prot_length_overall_sum[prot_length_overall_sum$anti == "CuZnSOD", ]$mean_len),
                                    antioxidant_per_prot_max = express_overall[express_overall$antioxi_string == "CuZnSOD", ]$mean_exp)
 
-nisod_val_both <- ranges_of_pars(500000, 
+nisod_val_both <- ranges_of_pars(number_to_gen_i, 
                                  metal_per_antioxidant = c(1), 
                                  anti_per_aa = c(1/prot_length_overall_sum[prot_length_overall_sum$anti == "NiSOD", ]$mean_len),
                                  antioxidant_per_prot_max = express_overall[express_overall$antioxi_string == "NiSOD", ]$mean_exp)
@@ -168,9 +181,12 @@ overall_c_to_fe <- rbind(overall_c_to_fe_variation_both,
 
 contribution_quantiles_both <- overall_c_to_fe %>%
   group_by(mnfesod) %>%
+  # sample_n(1000) %>%
   summarize(lower = quantile(c_to_fe_overall, probs = .025),
             upper = quantile(c_to_fe_overall, probs = .975),
             median = quantile(c_to_fe_overall, probs = 0.5))
+
+print(contribution_quantiles_both)
 # contribution_quantiles_both$quantile_string <- paste(round(contribution_quantiles_both$lower, 2), 
 #                                                      round(contribution_quantiles_both$upper, 2), 
 #                                                      sep = "-") 
@@ -180,7 +196,7 @@ both_contribution_overall_p <- overall_c_to_fe %>%
   geom_density(aes(fill = mnfesod),
                alpha = 0.4) +
   theme_bw() +
-  xlim(0, 15) +
+  xlim(0, 9) +
   # geom_text(data = contribution_quantiles_both, aes(label = quantile_string,
   #                                                   y = position_y),
   #           x = 10) +
@@ -193,7 +209,7 @@ ccp_both_p1 <- ccp_val_both %>%
   ggplot(aes(x = c_to_fe)) +
   geom_density(fill = 'firebrick4', alpha = 0.4) +
   theme_bw() +
-  xlim(0, 15) +
+  xlim(0, 9) +
   ylab('Kernel Density') +
   xlab('Cytochrome C Peroxidase Contribution to Fe:C (umol/mol)');ccp_both_p1
 
@@ -201,7 +217,7 @@ cat_both_p1 <- cat_both %>%
   ggplot(aes(x = c_to_fe)) +
   geom_density(fill = 'firebrick4', alpha = 0.4) +
   theme_bw() + 
-  xlim(0, 15) +
+  xlim(0, 9) +
   ylab('Kernel Density') +
   xlab('Catalase Contribution to Fe:C (umol/mol)');cat_both_p1
 
@@ -210,7 +226,7 @@ mnfesod_both_p1 <- mnfesod_both %>%
   geom_density(fill = 'firebrick4', alpha = 0.4) +
   # geom_histogram() +
   theme_bw() + 
-  xlim(0, 15) +
+  xlim(0, 9) +
   # xlim(0, 50) +
   ylab('Kernel Density') +
   xlab('MnFeSOD Contribution to Mn, Fe:C (umol/mol)');mnfesod_both_p1
@@ -220,7 +236,7 @@ apx_both_p1 <- apx_val_both %>%
   geom_density(fill = 'firebrick4', alpha = 0.4) +
   # geom_histogram() +
   theme_bw() + 
-  xlim(0, 15) +
+  xlim(0, 9) +
   # xlim(0, 50) +
   ylab('Kernel Density') +
   xlab('Ascorbate Peroxidase Contribution to Fe:C (umol/mol)');apx_both_p1
@@ -233,7 +249,7 @@ fe_anti_plot <- ggarrange(ggarrange(ccp_both_p1,
                     labels = c('a', 'b', 'c', 'd')),
           both_contribution_overall_p, ncol = 1, labels = c('', 'e'))
 
-ggsave(fe_anti_plot, filename = 'figures/fe_anti_plot.png', width = 9.17, height = 7.07)
+ggsave(fe_anti_plot, filename = 'figures/fe_anti_plot.png', width = 9.17, height = 7.27)
 
 # plotting other micronutrients -------------------------------------------
 
@@ -245,7 +261,7 @@ nisod_both_p1 <- nisod_val_both %>%
   ylab('Kernel Density') +
   # xlim(0,) +
   # xlim(0, 50) +
-  xlim(0, 3) +
+  xlim(0, 1) +
   xlab('NiSOD Contribution to Ni:C (umol/mol)');nisod_both_p1
 
 
@@ -255,12 +271,13 @@ cuznsod_both_p1 <- cuznsod_val_both %>%
   # geom_histogram() +
   theme_bw() + 
   # xlim(0,) +
-  xlim(0, 3) +
+  xlim(0, 1) +
   ylab('Kernel Density') +
   xlab('CuZnSOD Contribution to Cu, Zn:C (umol/mol)');cuznsod_both_p1
 
-quantile(nisod_val_both$c_to_fe, probs = c(0.025, 0.5, 0.975))
-quantile(cuznsod_val_both$c_to_fe, probs = c(0.025, 0.5, 0.975))
+print(quantile(mnfesod_both$c_to_fe, probs = c(0.025, 0.5, 0.975)))
+print(quantile(nisod_val_both$c_to_fe, probs = c(0.025, 0.5, 0.975)))
+print(quantile(cuznsod_val_both$c_to_fe, probs = c(0.025, 0.5, 0.975)))
 
 other_micro <- ggarrange(nisod_both_p1, cuznsod_both_p1, labels = c('a', 'b'), ncol = 2)
 
