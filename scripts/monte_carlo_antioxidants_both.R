@@ -31,14 +31,25 @@ outcome_var <- function(number_to_gen, metal_per_antioxidant = 2,
   # expression_foldchange <- rlnorm(number_to_gen, meanlog = mean_mean, 
   #                                 sdlog = mean_sd)
   
-  schmidt2016_sam <- sample(x = schmidt0216_emp$fold_change, size = 1)
-  nunn2013_sam <- sample(x = nunn2013_emp$fold_change, size = 1)
-  li2014_sam <- sample(x = li2014_emp$fold_change, size = 1)
+  # schmidt2016_sam <- sample(x = schmidt0216_emp$fold_change, size = 1)
+  # nunn2013_sam <- sample(x = nunn2013_emp$fold_change, size = 1)
+  # li2014_sam <- sample(x = li2014_emp$fold_change, size = 1)
+  # 
+  # expression_foldchange <- sample(x = c(schmidt2016_sam, nunn2013_sam, li2014_sam), size = 1)
+  # 
+  # expression_foldchange <- runif(n = 1, min = 0.05, max = 2.5)
   
-  expression_foldchange <- sample(x = c(schmidt2016_sam, nunn2013_sam, li2014_sam), size = 1)
-  # expression_foldchange <- 4
-  # expression_foldchange <- rlnorm(number_to_gen, meanlog = -0.024092762, sdlog = 0.871026349)
-  # expression_foldchange <- rlnorm(number_to_gen, meanlog = 0.63596409, sdlog = 1.17032277)
+  ## Set up sampling so that equal number of samples are expected from each dataset
+  lens <- c(length(schmidt0216_emp$fold_change),
+            length(nunn2013_emp$fold_change),
+            length(li2014_emp$fold_change))
+  prob <- rep(1/(lens*3), lens)
+  
+  ## sample number_to_gen items from these empirical values
+  expression_foldchange <- sample(x = c(schmidt0216_emp$fold_change,
+                                        nunn2013_emp$fold_change,
+                                        li2014_emp$fold_change),
+                                  size=number_to_gen, replace=TRUE, prob=prob)
   antioxidant_per_prot <- antioxidant_per_prot_max*expression_foldchange#*antioxidant_per_prot_max_noise_added
   
   protein_aa_per_N <- 0.699
@@ -125,7 +136,8 @@ express_overall <- rbind(express_frag,
   summarize(max_exp = max(total_val),
             mean_exp = mean(total_val))
 
-number_to_gen_i <- 100000000
+# number_to_gen_i <- 100000000
+number_to_gen_i <- 1000000
 
 # running monte carlo -----------------------------------------------------------
 
@@ -187,7 +199,7 @@ contribution_quantiles_both <- overall_c_to_fe %>%
             median = quantile(c_to_fe_overall, probs = 0.5))
 
 print(contribution_quantiles_both)
-# contribution_quantiles_both$quantile_string <- paste(round(contribution_quantiles_both$lower, 2), 
+    # contribution_quantiles_both$quantile_string <- paste(round(contribution_quantiles_both$lower, 2), 
 #                                                      round(contribution_quantiles_both$upper, 2), 
 #                                                      sep = "-") 
 
@@ -261,7 +273,7 @@ nisod_both_p1 <- nisod_val_both %>%
   ylab('Kernel Density') +
   # xlim(0,) +
   # xlim(0, 50) +
-  xlim(0, 1) +
+  xlim(0, 2) +
   xlab('NiSOD Contribution to Ni:C (umol/mol)');nisod_both_p1
 
 
