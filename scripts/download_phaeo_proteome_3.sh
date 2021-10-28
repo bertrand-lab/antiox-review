@@ -1,0 +1,8 @@
+# script to go in an download all the mass spec data for the Phaeodactylum proteomes
+
+../../../.aspera/connect/bin/ascp -TQ -l200m -P 33001 -i "../../../.aspera/connect/etc/asperaweb_id_dsa.openssh" prd_ascp@fasp.ebi.ac.uk:pride/data/archive/2020/06/PXD014877/20190105_QX3_JoMu_SA_LC04_uPAC200cm_Phaeodactylum_tricornutum+iRT_F1.raw ../data/protein_expression_data/mass_spec_data/phaeo_data_3/
+../../../.aspera/connect/bin/ascp -TQ -l200m -P 33001 -i "../../../.aspera/connect/etc/asperaweb_id_dsa.openssh" prd_ascp@fasp.ebi.ac.uk:pride/data/archive/2020/06/PXD014877/20190105_QX3_JoMu_SA_LC04_uPAC200cm_Phaeodactylum_tricornutum+iRT_F2.raw ../data/protein_expression_data/mass_spec_data/phaeo_data_3/
+../../../.aspera/connect/bin/ascp -TQ -l200m -P 33001 -i "../../../.aspera/connect/etc/asperaweb_id_dsa.openssh" prd_ascp@fasp.ebi.ac.uk:pride/data/archive/2020/06/PXD014877/20190105_QX3_JoMu_SA_LC04_uPAC200cm_Phaeodactylum_tricornutum+iRT_F3.raw ../data/protein_expression_data/mass_spec_data/phaeo_data_3/
+../../../.aspera/connect/bin/ascp -TQ -l200m -P 33001 -i "../../../.aspera/connect/etc/asperaweb_id_dsa.openssh" prd_ascp@fasp.ebi.ac.uk:pride/data/archive/2020/06/PXD014877/20190105_QX3_JoMu_SA_LC04_uPAC200cm_Phaeodactylum_tricornutum+iRT_F4.raw ../data/protein_expression_data/mass_spec_data/phaeo_data_3/
+../../../.aspera/connect/bin/ascp -TQ -l200m -P 33001 -i "../../../.aspera/connect/etc/asperaweb_id_dsa.openssh" prd_ascp@fasp.ebi.ac.uk:pride/data/archive/2020/06/PXD014877/20190105_QX3_JoMu_SA_LC04_uPAC200cm_Phaeodactylum_tricornutum+iRT_F5.raw ../data/protein_expression_data/mass_spec_data/phaeo_data_3/
+

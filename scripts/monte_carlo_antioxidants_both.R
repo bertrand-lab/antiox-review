@@ -3,13 +3,6 @@ library(magrittr)
 library(ggpubr)
 library(dplyr)
 
-# li2014_est <- read.csv('data/li2014_lgnormal_dist.csv')
-# schmidt2016_est <- read.csv('data/schmidt2016_lgnormal_dist.csv')
-# nunn2013_est <- read.csv('data/nunn2013_lgnormal_dist.csv')
-# 
-# mean_mean <- mean(c(li2014_est$meanlog, schmidt2016_est$meanlog, nunn2013_est$meanlog))
-# mean_sd <- mean(c(li2014_est$meansd, schmidt2016_est$meansd, nunn2013_est$meansd))
-
 li2014_emp <- read.csv("data/li2014_empirical_dist.csv")
 nunn2013_emp <- read.csv("data/nunn2013_empirical_dist.csv")
 schmidt0216_emp <- read.csv("data/schmidt2016_empirical_dist.csv")
@@ -17,27 +10,6 @@ schmidt0216_emp <- read.csv("data/schmidt2016_empirical_dist.csv")
 outcome_var <- function(number_to_gen, metal_per_antioxidant = 2,
                         anti_per_aa = 1/310,
                         antioxidant_per_prot_max = 0.04){
-  
-  # empirical_noise <- antioxidant_per_prot_max*exp(x = -6.02263 - 0.63273*log(antioxidant_per_prot_max))
-  # 
-  # antioxidant_per_prot_max_noise_added <- truncnorm::rtruncnorm(n = number_to_gen,
-  #                                                               a = 0, b = Inf,
-  #                                                               mean = antioxidant_per_prot_max,
-  #                                                               sd = empirical_noise)
-
-  # antioxidant_per_prot <- runif(n = number_to_gen,
-  #                               min = 0,
-  #                               max = antioxidant_per_prot_max_noise_added)
-  # expression_foldchange <- rlnorm(number_to_gen, meanlog = mean_mean, 
-  #                                 sdlog = mean_sd)
-  
-  # schmidt2016_sam <- sample(x = schmidt0216_emp$fold_change, size = 1)
-  # nunn2013_sam <- sample(x = nunn2013_emp$fold_change, size = 1)
-  # li2014_sam <- sample(x = li2014_emp$fold_change, size = 1)
-  # 
-  # expression_foldchange <- sample(x = c(schmidt2016_sam, nunn2013_sam, li2014_sam), size = 1)
-  # 
-  # expression_foldchange <- runif(n = 1, min = 0.05, max = 2.5)
   
   ## Set up sampling so that equal number of samples are expected from each dataset
   lens <- c(length(schmidt0216_emp$fold_change),
@@ -50,7 +22,7 @@ outcome_var <- function(number_to_gen, metal_per_antioxidant = 2,
                                         nunn2013_emp$fold_change,
                                         li2014_emp$fold_change),
                                   size=number_to_gen, replace=TRUE, prob=prob)
-  antioxidant_per_prot <- antioxidant_per_prot_max*expression_foldchange#*antioxidant_per_prot_max_noise_added
+  antioxidant_per_prot <- antioxidant_per_prot_max*expression_foldchange
   
   protein_aa_per_N <- 0.699
   
@@ -58,7 +30,6 @@ outcome_var <- function(number_to_gen, metal_per_antioxidant = 2,
                                        min = 0.5, 
                                        max = 0.85)
   
-  # N_only <- rnorm(n = number_to_gen, mean = 16, sd = 5)
   N_only <- truncnorm::rtruncnorm(n = number_to_gen, a = 0, b = Inf, 
                                   mean = 16, sd = 5)
   
@@ -76,38 +47,41 @@ outcome_var <- function(number_to_gen, metal_per_antioxidant = 2,
 ranges_of_pars <- function(number_to_gen, metal_per_antioxidant = c(2),
                            anti_per_aa = c(1/400),
                            antioxidant_per_prot_max = c(0.04)){
-  
+  ###
+  # wrapper function for above MC simulation
+  ###
+
   c_to_fe_vec <- c()
   metal_per_antioxidant_vec <- c()
   anti_per_aa_vec <- c()
   antioxidant_per_prot_max_vec <- c()
-  
+
   for(i in 1:length(metal_per_antioxidant)){
     for(j in 1:length(anti_per_aa)){
       for(k in 1:length(antioxidant_per_prot_max)){
-        c_to_fe_vec_sub <- outcome_var(number_to_gen = number_to_gen, 
+        c_to_fe_vec_sub <- outcome_var(number_to_gen = number_to_gen,
                                        metal_per_antioxidant = metal_per_antioxidant[i],
                                        anti_per_aa = anti_per_aa[j],
                                        antioxidant_per_prot_max = antioxidant_per_prot_max[k])
-        
-        c_to_fe_vec <- c(c_to_fe_vec, 
+
+        c_to_fe_vec <- c(c_to_fe_vec,
                          c_to_fe_vec_sub)
-        
+
         metal_per_antioxidant_vec <- c(metal_per_antioxidant_vec,
                                        rep(metal_per_antioxidant[i],
                                            number_to_gen))
         anti_per_aa_vec <- c(anti_per_aa_vec,
-                             rep(anti_per_aa[j], 
+                             rep(anti_per_aa[j],
                                  number_to_gen))
         antioxidant_per_prot_max_vec <- c(antioxidant_per_prot_max_vec,
-                                          rep(antioxidant_per_prot_max[k], 
+                                          rep(antioxidant_per_prot_max[k],
                                               number_to_gen))
-        
+
       }
     }
   }
-  
-  return(data.frame(c_to_fe = c_to_fe_vec, 
+
+  return(data.frame(c_to_fe = c_to_fe_vec,
                     metal_per_antiox = paste0("Metal per Antioxidant: ",
                                               metal_per_antioxidant_vec),
                     amino_per_anti = paste0("AA per Antioxidant: ",
@@ -116,15 +90,18 @@ ranges_of_pars <- function(number_to_gen, metal_per_antioxidant = c(2),
                                            antioxidant_per_prot_max_vec)))
 }
 
+# reading in the protein length data for Frag
 prot_length_frag <- read.csv("data/protein_expression_data/frag_anti_prot_lengths.csv")
 express_frag <- read.csv("data/protein_expression_data/frag_max_antiox_expression.csv")
 
+# reading in the protein length data for Phaeo
 prot_length_phae <- read.csv("data/protein_expression_data/phae_anti_prot_lengths.csv")
 express_phae <- read.csv("data/protein_expression_data/phae_max_antiox_expression.csv")
 
 prot_length_overall <- rbind(prot_length_frag,
                              prot_length_phae)
 
+# getting average protein length
 prot_length_overall_sum <- prot_length_overall %>% 
   group_by(anti) %>% 
   summarize(mean_len = mean(sequence_lengths))
@@ -136,7 +113,6 @@ express_overall <- rbind(express_frag,
   summarize(max_exp = max(total_val),
             mean_exp = mean(total_val))
 
-# number_to_gen_i <- 100000000
 number_to_gen_i <- 1000000
 
 # running monte carlo -----------------------------------------------------------
@@ -174,17 +150,17 @@ nisod_val_both <- ranges_of_pars(number_to_gen_i,
 
 
 
-
+# aggregating the results
 overall_c_to_fe_variation_both <- data.frame(c_to_fe_overall = mnfesod_both$c_to_fe + 
                                                apx_val_both$c_to_fe + 
                                                ccp_val_both$c_to_fe + 
                                                cat_both$c_to_fe)
-overall_c_to_fe_variation_both$mnfesod <- rep('Including MnFeSOD', nrow(overall_c_to_fe_variation_both)) 
+overall_c_to_fe_variation_both$mnfesod <- rep('MnFeSOD as FeSOD', nrow(overall_c_to_fe_variation_both)) 
 
 overall_c_to_fe_variation_both_no_mnfesod <- data.frame(c_to_fe_overall = apx_val_both$c_to_fe + 
                                                ccp_val_both$c_to_fe + 
                                                cat_both$c_to_fe)
-overall_c_to_fe_variation_both_no_mnfesod$mnfesod <- rep('Exluding MnFeSOD', nrow(overall_c_to_fe_variation_both_no_mnfesod)) 
+overall_c_to_fe_variation_both_no_mnfesod$mnfesod <- rep('MnFeSOD as MnSOD', nrow(overall_c_to_fe_variation_both_no_mnfesod)) 
 
 overall_c_to_fe <- rbind(overall_c_to_fe_variation_both, 
                          overall_c_to_fe_variation_both_no_mnfesod)
@@ -199,9 +175,6 @@ contribution_quantiles_both <- overall_c_to_fe %>%
             median = quantile(c_to_fe_overall, probs = 0.5))
 
 print(contribution_quantiles_both)
-    # contribution_quantiles_both$quantile_string <- paste(round(contribution_quantiles_both$lower, 2), 
-#                                                      round(contribution_quantiles_both$upper, 2), 
-#                                                      sep = "-") 
 
 both_contribution_overall_p <- overall_c_to_fe %>% 
   ggplot(aes(x = c_to_fe_overall)) +
@@ -209,9 +182,6 @@ both_contribution_overall_p <- overall_c_to_fe %>%
                alpha = 0.4) +
   theme_bw() +
   xlim(0, 9) +
-  # geom_text(data = contribution_quantiles_both, aes(label = quantile_string,
-  #                                                   y = position_y),
-  #           x = 10) +
   xlab('Overall Antioxidant Contribution to Fe:C (umol/mol)') +
   ylab('Kernel Density') +
   theme(legend.position = c(0.8, 0.8), 
@@ -236,20 +206,16 @@ cat_both_p1 <- cat_both %>%
 mnfesod_both_p1 <- mnfesod_both %>% 
   ggplot(aes(x = c_to_fe)) +
   geom_density(fill = 'firebrick4', alpha = 0.4) +
-  # geom_histogram() +
   theme_bw() + 
   xlim(0, 9) +
-  # xlim(0, 50) +
   ylab('Kernel Density') +
   xlab('MnFeSOD Contribution to Mn, Fe:C (umol/mol)');mnfesod_both_p1
 
 apx_both_p1 <- apx_val_both %>% 
   ggplot(aes(x = c_to_fe)) +
   geom_density(fill = 'firebrick4', alpha = 0.4) +
-  # geom_histogram() +
   theme_bw() + 
   xlim(0, 9) +
-  # xlim(0, 50) +
   ylab('Kernel Density') +
   xlab('Ascorbate Peroxidase Contribution to Fe:C (umol/mol)');apx_both_p1
 

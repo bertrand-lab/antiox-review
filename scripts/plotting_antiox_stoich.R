@@ -1,4 +1,4 @@
-## antioxi tara
+## antioxi tara plotting stoichiometry
 library(ggplot2)
 library(magrittr)
 library(dplyr)
@@ -15,8 +15,6 @@ stoich_t_ratio <- stoich_t %>%
          O_N = O/N,
          S_N = S/N)
 
-stoich_t_ratio %>% filter(prot_name == "Ferritin")
-
 hydro_plot <- stoich_t_ratio %>% 
   filter(prot_name != "Ferritin") %>% 
   ggplot(aes(x = H_N,
@@ -24,7 +22,6 @@ hydro_plot <- stoich_t_ratio %>%
              fill = prot_name)) +
   stat_density_ridges(quantile_lines = TRUE,
                       alpha = 0.8) +
-  # facet_grid(~prot_name) +
   theme_bw() +
   xlab("H:N") +
   ylab('Protein Name');hydro_plot
@@ -36,7 +33,6 @@ carbon_plot <- stoich_t_ratio %>%
              fill = prot_name)) +
   stat_density_ridges(quantile_lines = TRUE,
                       alpha = 0.8) +
-  # facet_grid(~prot_name) +
   theme_bw() +
   xlab("C:N") +
   ylab('Protein Name');carbon_plot
@@ -48,7 +44,6 @@ oxy_plot <- stoich_t_ratio %>%
              fill = prot_name)) +
   stat_density_ridges(quantile_lines = TRUE,
                       alpha = 0.8) +
-  # facet_grid(~prot_name) +
   theme_bw() +
   xlab("O:N") +
   ylab('Protein Name');oxy_plot
@@ -58,10 +53,8 @@ sul_plot <- stoich_t_ratio %>%
   ggplot(aes(x = S_N,
              y = prot_name,
              fill = prot_name)) +
-  # geom_density_ridges(alpha = 0.4) +
   stat_density_ridges(quantile_lines = TRUE,
                       alpha = 0.8) +
-    # facet_grid(~prot_name) +
   theme_bw() +
   xlab("S:N") +
   ylab('Protein Name');sul_plot
@@ -72,20 +65,7 @@ compiled_macro_stoich <- ggarrange(hydro_plot, carbon_plot, oxy_plot, sul_plot, 
 
 ggsave(compiled_macro_stoich, file = 'figures/compiled_macro_stoich.png', width = 7.24, height = 5.88)
 
-stoich_t_ratio %>% 
-  filter(prot_name != "Ferritin") %>% 
-  ggplot(aes(x = Sequence_Length,
-             y = prot_name,
-             fill = prot_name)) +
-  stat_density_ridges(quantile_lines = TRUE,
-                      alpha = 0.8) +
-  # facet_grid(~prot_name) +
-  theme_bw() +
-  # xlim(0, 500) +
-  xlab("Sequence Length") +
-  ylab('Protein Name') +
-  xlim(0, 1000)
-
+# getting proetein lengths and summary statistics
 summary_table_stoich <- stoich_t_ratio %>% 
   group_by(prot_name) %>% 
   summarize(median_length = median(Sequence_Length),
@@ -98,11 +78,10 @@ summary_table_stoich <- stoich_t_ratio %>%
 write.csv(summary_table_stoich, 
           'data/summary_table_stoich.csv', row.names = FALSE)
 
-
+# number atoms per protein
 n_atoms_per_prot <- stoich_t_ratio %>% 
   group_by(prot_name) %>% 
   summarize(median_n = median(N))
-
 
 write.csv(n_atoms_per_prot, 'data/n_atoms_per_prot.csv',
           row.names = FALSE)
