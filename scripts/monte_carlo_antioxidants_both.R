@@ -182,7 +182,7 @@ both_contribution_overall_p <- overall_c_to_fe %>%
                alpha = 0.4) +
   theme_bw() +
   xlim(0, 9) +
-  xlab('Overall Antioxidant Contribution to Fe:C (umol/mol)') +
+  xlab(expression('Overall Antioxidant Contribution to Fe:C ('*mu*'mol/mol)')) +
   ylab('Kernel Density') +
   theme(legend.position = c(0.8, 0.8), 
         legend.title = element_blank());both_contribution_overall_p
@@ -193,7 +193,7 @@ ccp_both_p1 <- ccp_val_both %>%
   theme_bw() +
   xlim(0, 9) +
   ylab('Kernel Density') +
-  xlab('Cytochrome C Peroxidase Contribution to Fe:C (umol/mol)');ccp_both_p1
+  xlab(expression('Cytochrome c Peroxidase Contribution to Fe:C ('*mu*'mol/mol)'));ccp_both_p1
 
 cat_both_p1 <- cat_both %>% 
   ggplot(aes(x = c_to_fe)) +
@@ -201,7 +201,7 @@ cat_both_p1 <- cat_both %>%
   theme_bw() + 
   xlim(0, 9) +
   ylab('Kernel Density') +
-  xlab('Catalase Contribution to Fe:C (umol/mol)');cat_both_p1
+  xlab(expression('Catalase Contribution to Fe:C ('*mu*'mol/mol)'));cat_both_p1
 
 mnfesod_both_p1 <- mnfesod_both %>% 
   ggplot(aes(x = c_to_fe)) +
@@ -209,7 +209,7 @@ mnfesod_both_p1 <- mnfesod_both %>%
   theme_bw() + 
   xlim(0, 9) +
   ylab('Kernel Density') +
-  xlab('MnFeSOD Contribution to Mn, Fe:C (umol/mol)');mnfesod_both_p1
+  xlab(expression('MnFeSOD Contribution to Mn, Fe:C ('*mu*'mol/mol)'));mnfesod_both_p1
 
 apx_both_p1 <- apx_val_both %>% 
   ggplot(aes(x = c_to_fe)) +
@@ -217,7 +217,7 @@ apx_both_p1 <- apx_val_both %>%
   theme_bw() + 
   xlim(0, 9) +
   ylab('Kernel Density') +
-  xlab('Ascorbate Peroxidase Contribution to Fe:C (umol/mol)');apx_both_p1
+  xlab(expression('Ascorbate Peroxidase Contribution to Fe:C ('*mu*'mol/mol)'));apx_both_p1
 
 
 fe_anti_plot <- ggarrange(ggarrange(ccp_both_p1, 
@@ -240,8 +240,7 @@ nisod_both_p1 <- nisod_val_both %>%
   # xlim(0,) +
   # xlim(0, 50) +
   xlim(0, 2) +
-  xlab('NiSOD Contribution to Ni:C (umol/mol)');nisod_both_p1
-
+  xlab(expression('NiSOD Contribution to Ni:C ('*mu*'mol/mol)'));nisod_both_p1
 
 cuznsod_both_p1 <- cuznsod_val_both %>% 
   ggplot(aes(x = c_to_fe)) +
@@ -251,7 +250,7 @@ cuznsod_both_p1 <- cuznsod_val_both %>%
   # xlim(0,) +
   xlim(0, 1) +
   ylab('Kernel Density') +
-  xlab('CuZnSOD Contribution to Cu, Zn:C (umol/mol)');cuznsod_both_p1
+  xlab(expression('CuZnSOD Contribution to Cu, Zn:C ('*mu*'mol/mol)'));cuznsod_both_p1
 
 print(quantile(mnfesod_both$c_to_fe, probs = c(0.025, 0.5, 0.975)))
 print(quantile(nisod_val_both$c_to_fe, probs = c(0.025, 0.5, 0.975)))
